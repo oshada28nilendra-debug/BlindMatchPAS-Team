@@ -1,0 +1,77 @@
+@model BlindMatchPAS.Web.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="pas-card">
+            <div class="text-center mb-4">
+                <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:1.4rem;">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h2 class="fw-700 mb-1">Create Account</h2>
+                <p class="text-muted small">Join the Blind-Match Project Approval System</p>
+            </div>
+
+            <form asp-controller="Account" asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors mb-3"></div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label asp-for="FullName" class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" placeholder="John Smith" id="regFullName" />
+                        <span asp-validation-for="FullName" class="field-validation-error"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Role" class="form-label">Role</label>
+                        <select asp-for="Role" class="form-select" id="regRole">
+                            <option value="">— Select —</option>
+                            <option value="Student">Student</option>
+                            <option value="Supervisor">Supervisor</option>
+                        </select>
+                        <span asp-validation-for="Role" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email Address</label>
+                    <input asp-for="Email" class="form-control" placeholder="you@university.edu" id="regEmail" />
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Department" class="form-label">Department / Faculty <span class="text-muted">(optional)</span></label>
+                    <input asp-for="Department" class="form-control" placeholder="e.g. Computer Science" id="regDepartment" />
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" class="form-control" placeholder="Min. 8 chars" id="regPassword" />
+                        <span asp-validation-for="Password" class="field-validation-error"></span>
+                        <div class="small text-muted mt-1">Must include upper, lower, digit &amp; special char.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Repeat password" id="regConfirmPassword" />
+                        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" id="registerSubmitBtn">
+                    <i class="bi bi-person-check me-2"></i>Create Account
+                </button>
+            </form>
+
+            <div class="divider"></div>
+            <p class="text-center text-muted small mb-0">
+                Already have an account?
+                <a asp-controller="Account" asp-action="Login" class="text-primary fw-500">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>

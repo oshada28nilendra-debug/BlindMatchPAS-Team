@@ -1,0 +1,44 @@
+## .gitignore for BlindMatchPAS
+
+# Build outputs
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+
+# User-specific files
+*.userprefs
+
+# NuGet
+*.nupkg
+**/packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+**/wwwroot/lib/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / Secrets
+**/appsettings.Development.json
+**/*.pfx
+**/*.env
+
+# Visual Studio
+.vs/
+*.sln.docstates
+
+# Rider
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

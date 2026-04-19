@@ -1,0 +1,55 @@
+@model BlindMatchPAS.Web.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-5 col-lg-4">
+        <div class="pas-card">
+            <div class="text-center mb-4">
+                <div class="brand-icon mx-auto mb-3" style="width:52px;height:52px;font-size:1.4rem;">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h2 class="fw-700 mb-1">Welcome back</h2>
+                <p class="text-muted small">Sign in to your PAS account</p>
+            </div>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email address</label>
+                    <input asp-for="Email" class="form-control" placeholder="you@university.edu" autocomplete="email" id="loginEmail" />
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" id="loginPassword" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                        <label class="form-check-label small text-muted" for="rememberMe">Remember me</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" id="loginSubmitBtn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <div class="divider"></div>
+            <p class="text-center text-muted small mb-0">
+                Don't have an account?
+                <a asp-controller="Account" asp-action="Register" class="text-primary fw-500">Register here</a>
+            </p>
+        </div>
+    </div>
+</div>

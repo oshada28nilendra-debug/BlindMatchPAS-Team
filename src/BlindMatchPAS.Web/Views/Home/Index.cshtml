@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Welcome";
+    Layout = "_Layout";
+}
+
+<section class="hero-section">
+    <div class="hero-badge">
+        <i class="bi bi-shield-lock-fill"></i> Anonymous · Secure · Fair
+    </div>
+    <h1 class="hero-title">
+        The <span class="gradient">Blind-Match</span><br/>Project Approval System
+    </h1>
+    <p class="hero-subtitle">
+        Students submit research proposals anonymously reviewed by supervisors —
+        identities are only revealed after a match is confirmed.
+    </p>
+    @if (!User.Identity!.IsAuthenticated)
+    {
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg px-5">
+                <i class="bi bi-person-plus me-2"></i>Get Started
+            </a>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg px-5">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+            </a>
+        </div>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Dashboard" class="btn btn-primary btn-lg px-5">
+            <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+        </a>
+    }
+</section>
+
+<div class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="pas-card h-100">
+            <div class="feature-icon-wrap"><i class="bi bi-incognito text-primary"></i></div>
+            <h5 class="fw-700 mb-2">Blind Matching</h5>
+            <p class="text-muted small">Student identities remain completely hidden from supervisors until a match is confirmed — ensuring fair, unbiased evaluation.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pas-card h-100">
+            <div class="feature-icon-wrap"><i class="bi bi-shield-check text-info"></i></div>
+            <h5 class="fw-700 mb-2">Role-Based Access</h5>
+            <p class="text-muted small">Students, Supervisors, Module Leaders and System Admins each have strictly separated dashboards and permissions.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pas-card h-100">
+            <div class="feature-icon-wrap"><i class="bi bi-arrow-repeat text-success"></i></div>
+            <h5 class="fw-700 mb-2">Status Tracking</h5>
+            <p class="text-muted small">Real-time project status: Pending → Under Review → Matched. Both parties are notified when identity is revealed.</p>
+        </div>
+    </div>
+</div>
+
+@if (!User.Identity!.IsAuthenticated)
+{
+    <div class="pas-card mt-5 p-4">
+        <h5 class="mb-3 text-muted fw-600">Demo Accounts</h5>
+        <div class="row g-3">
+            @foreach (var (role, email, pwd) in new[] {
+                ("Student", "student@pas.edu", "Student@1234!"),
+                ("Supervisor", "supervisor@pas.edu", "Supervisor@1234!"),
+                ("Module Leader", "leader@pas.edu", "Leader@1234!"),
+                ("System Admin", "admin@pas.edu", "Admin@1234!")
+            })
+            {
+                <div class="col-sm-6 col-lg-3">
+                    <div class="rounded p-3" style="background:var(--pas-surface-2);border:1px solid var(--pas-border)">
+                        <div class="small fw-600 mb-1">@role</div>
+                        <div class="small text-muted">@email</div>
+                        <div class="small text-muted">Pass: @pwd</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
