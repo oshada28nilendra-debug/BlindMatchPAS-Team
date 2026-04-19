@@ -1,0 +1,158 @@
+@model BlindMatchPAS.Web.Models.Project
+@using BlindMatchPAS.Web.Models.Enums
+@{
+    ViewData["Title"] = "Project Details";
+    Layout = "_Layout";
+    var revealedMatch = Model.Matches.FirstOrDefault(m => m.Status == MatchStatus.Revealed);
+}
+
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1 class="mb-1"><i class="bi bi-file-earmark-text-fill me-2 text-gradient"></i>@Model.Title</h1>
+        <p class="text-muted small mb-0">Project Details</p>
+    </div>
+    <a asp-controller="Student" asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Project Info -->
+        <div class="pas-card mb-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                @{
+                    var (badgeCls, statusLabel) = Model.Status switch {
+                        ProjectStatus.Pending     => ("badge-pending",   "Pending"),
+                        ProjectStatus.UnderReview => ("badge-review",    "Under Review"),
+                        ProjectStatus.Matched     => ("badge-matched",   "Matched"),
+                        _                         => ("badge-withdrawn", "Withdrawn")
+                    };
+                }
+                <span class="badge @badgeCls px-3 py-1 rounded-pill">@statusLabel</span>
+                <span class="text-muted small"><i class="bi bi-tag me-1"></i>@Model.ResearchArea?.Name</span>
+            </div>
+
+            <h5 class="fw-600 text-muted small text-uppercase letter-spacing mb-1">Abstract</h5>
+            <p class="mb-4" style="line-height:1.8">@Model.Abstract</p>
+
+            <h5 class="fw-600 text-muted small text-uppercase mb-1">Technology Stack</h5>
+            <div class="mb-0">
+                @foreach (var tech in Model.TechStack.Split(',', System.StringSplitOptions.TrimEntries))
+                {
+                    <span class="badge me-1 mb-1" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);padding:5px 10px;border-radius:20px;font-weight:500">
+                        @tech
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- Interest Tracker -->
+        @if (Model.Matches.Any())
+        {
+            <div class="pas-card">
+                <h5 class="fw-600 mb-3"><i class="bi bi-heart me-2 text-primary"></i>Interest Received</h5>
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var match in Model.Matches)
+                    {
+                        var (mbClass, mlabel) = match.Status switch {
+                            MatchStatus.Interested => ("badge-interested", "Interested"),
+                            MatchStatus.Confirmed  => ("badge-confirmed",  "Confirmed"),
+                            MatchStatus.Revealed   => ("badge-revealed",   "Revealed"),
+                            _                      => ("badge-pending",    "Unknown")
+                        };
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background:var(--pas-surface-2);border:1px solid var(--pas-border)">
+                            <div>
+                                @if (match.Status == MatchStatus.Revealed)
+                                {
+                                    <div class="fw-600 small">@match.Supervisor?.FullName</div>
+                                    <div class="text-muted small">@match.Supervisor?.Email</div>
+                                }
+                                else
+                                {
+                                    <div class="fw-600 small text-muted">Anonymous Supervisor</div>
+                                    <div class="text-muted small">Identity hidden until match confirmed</div>
+                                }
+                            </div>
+                            <span class="badge @mbClass px-2 py-1 rounded-pill small">@mlabel</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Status Card -->
+        <div class="pas-card mb-4">
+            <h5 class="fw-600 mb-3 small text-muted text-uppercase">Project Info</h5>
+            <div class="d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Submitted</span>
+                    <span>@Model.CreatedAt.ToString("dd MMM yyyy")</span>
+                </div>
+                @if (Model.UpdatedAt != null)
+                {
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">Last Updated</span>
+                        <span>@Model.UpdatedAt.Value.ToString("dd MMM yyyy")</span>
+                    </div>
+                }
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Research Area</span>
+                    <span>@Model.ResearchArea?.Name</span>
+                </div>
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Interested Supervisors</span>
+                    <span>@Model.Matches.Count</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supervisor Reveal -->
+        @if (revealedMatch != null)
+        {
+            <div class="pas-card" style="border-color:rgba(6,182,212,0.4);background:rgba(6,182,212,0.05)">
+                <div class="reveal-badge mb-3"><i class="bi bi-eye-fill"></i> Supervisor Revealed</div>
+                <div class="fw-700 mb-1">@revealedMatch.Supervisor?.FullName</div>
+                <div class="small text-muted mb-1">@revealedMatch.Supervisor?.Email</div>
+                @if (revealedMatch.Supervisor?.Department != null)
+                {
+                    <div class="small text-muted"><i class="bi bi-building me-1"></i>@revealedMatch.Supervisor.Department</div>
+                }
+                @if (revealedMatch.ConfirmedAt != null)
+                {
+                    <div class="small text-muted mt-2"><i class="bi bi-calendar-check me-1"></i>Matched @revealedMatch.RevealedAt?.ToString("dd MMM yyyy")</div>
+                }
+                @if (!string.IsNullOrEmpty(revealedMatch.SupervisorNotes))
+                {
+                    <div class="divider"></div>
+                    <div class="small text-muted fw-500">Supervisor Notes:</div>
+                    <div class="small mt-1">@revealedMatch.SupervisorNotes</div>
+                }
+            </div>
+        }
+
+        <!-- Actions -->
+        @if (Model.Status == ProjectStatus.Pending)
+        {
+            <div class="pas-card mt-4">
+                <h5 class="fw-600 mb-3 small text-muted text-uppercase">Actions</h5>
+                <div class="d-flex flex-column gap-2">
+                    <a asp-controller="Student" asp-action="Edit" asp-route-id="@Model.Id"
+                       class="btn btn-outline-primary btn-sm w-100" id="editProjectBtn">
+                        <i class="bi bi-pencil me-2"></i>Edit Project
+                    </a>
+                    <form asp-controller="Student" asp-action="Withdraw" method="post"
+                          onsubmit="return confirm('Withdraw this project? This cannot be undone.')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100" id="withdrawProjectBtn">
+                            <i class="bi bi-x-circle me-2"></i>Withdraw
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
