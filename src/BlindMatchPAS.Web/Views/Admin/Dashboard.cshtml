@@ -1,0 +1,157 @@
+@model BlindMatchPAS.Web.ViewModels.Admin.AdminDashboardViewModel
+@using BlindMatchPAS.Web.Models.Enums
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-grid-3x3-gap-fill me-2 text-gradient"></i>Admin Dashboard</h1>
+    <p class="text-muted small mb-0">System overview — Module Leader / System Administrator</p>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <div class="stat-value">@Model.TotalStudents</div>
+                <div class="stat-label">Students</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-person-workspace"></i></div>
+            <div>
+                <div class="stat-value">@Model.TotalSupervisors</div>
+                <div class="stat-label">Supervisors</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon amber"><i class="bi bi-file-earmark-text"></i></div>
+            <div>
+                <div class="stat-value">@Model.TotalProjects</div>
+                <div class="stat-label">Projects</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-link-45deg"></i></div>
+            <div>
+                <div class="stat-value">@Model.ConfirmedMatches</div>
+                <div class="stat-label">Confirmed Matches</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project status breakdown -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="pas-card text-center py-3">
+            <div class="small text-muted mb-1">Pending</div>
+            <div class="stat-value text-warning">@Model.PendingProjects</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pas-card text-center py-3">
+            <div class="small text-muted mb-1">Under Review</div>
+            <div class="stat-value text-info">@Model.UnderReviewProjects</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="pas-card text-center py-3">
+            <div class="small text-muted mb-1">Matched</div>
+            <div class="stat-value text-success">@Model.MatchedProjects</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick links -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="AllMatches" class="pas-card d-flex align-items-center gap-3 text-decoration-none" id="allMatchesLink">
+            <div class="stat-icon green"><i class="bi bi-link-45deg"></i></div>
+            <div>
+                <div class="fw-600">All Matches</div>
+                <div class="small text-muted">View &amp; reassign</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="ResearchAreas" class="pas-card d-flex align-items-center gap-3 text-decoration-none">
+            <div class="stat-icon purple"><i class="bi bi-tags"></i></div>
+            <div>
+                <div class="fw-600">Research Areas</div>
+                <div class="small text-muted">Manage tags &amp; categories</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="Users" class="pas-card d-flex align-items-center gap-3 text-decoration-none">
+            <div class="stat-icon cyan"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="fw-600">Users</div>
+                <div class="small text-muted">Manage all accounts</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Matches -->
+<div class="pas-card">
+    <h5 class="fw-600 mb-3"><i class="bi bi-clock-history me-2 text-muted"></i>Recent Matches</h5>
+    @if (!Model.RecentMatches.Any())
+    {
+        <p class="text-muted small text-center py-3">No matches yet.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="pas-table">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Student</th>
+                        <th>Supervisor</th>
+                        <th>Area</th>
+                        <th>Match Status</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.RecentMatches)
+                    {
+                        var (mbClass, mbLabel) = m.MatchStatus switch {
+                            MatchStatus.Interested => ("badge-interested", "Interested"),
+                            MatchStatus.Confirmed  => ("badge-confirmed",  "Confirmed"),
+                            MatchStatus.Revealed   => ("badge-revealed",   "Revealed"),
+                            _                      => ("badge-pending",    "Unknown")
+                        };
+                        <tr id="matchRow_@m.MatchId">
+                            <td class="fw-500">@m.ProjectTitle</td>
+                            <td class="small">@m.StudentName</td>
+                            <td class="small">@m.SupervisorName</td>
+                            <td class="small text-muted">@m.ResearchAreaName</td>
+                            <td><span class="badge @mbClass px-2 py-1 rounded-pill small">@mbLabel</span></td>
+                            <td class="small text-muted">@m.MatchCreatedAt.ToString("dd MMM")</td>
+                            <td>
+                                <a asp-controller="Admin" asp-action="Reassign" asp-route-matchId="@m.MatchId"
+                                   class="btn btn-xs btn-outline-warning small" id="reassignBtn_@m.MatchId">Reassign</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2 text-end">
+            <a asp-controller="Admin" asp-action="AllMatches" class="small text-primary">View all matches →</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,68 @@
+@model IEnumerable<BlindMatchPAS.Web.ViewModels.Admin.MatchSummaryViewModel>
+@using BlindMatchPAS.Web.Models.Enums
+@{
+    ViewData["Title"] = "All Matches";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-link-45deg me-2 text-gradient"></i>All Matches</h1>
+    <p class="text-muted small mb-0">Full overview of all supervisor–project matches</p>
+</div>
+
+<div class="pas-card">
+    <div class="table-responsive">
+        <table class="pas-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Project</th>
+                    <th>Student</th>
+                    <th>Supervisor</th>
+                    <th>Area</th>
+                    <th>Match</th>
+                    <th>Project</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model)
+                {
+                    var (mbClass, mbLabel) = m.MatchStatus switch {
+                        MatchStatus.Interested => ("badge-interested", "Interested"),
+                        MatchStatus.Confirmed  => ("badge-confirmed",  "Confirmed"),
+                        MatchStatus.Revealed   => ("badge-revealed",   "Revealed"),
+                        _                      => ("badge-pending",    "Unknown")
+                    };
+                    var (pbClass, pbLabel) = m.ProjectStatus switch {
+                        ProjectStatus.Pending    => ("badge-pending",   "Pending"),
+                        ProjectStatus.UnderReview=> ("badge-review",    "Review"),
+                        ProjectStatus.Matched    => ("badge-matched",   "Matched"),
+                        _                        => ("badge-withdrawn", "Withdrawn")
+                    };
+                    <tr id="matchRow_@m.MatchId">
+                        <td class="text-muted small">@m.MatchId</td>
+                        <td class="fw-500 small">@m.ProjectTitle</td>
+                        <td class="small">
+                            <div>@m.StudentName</div>
+                            <div class="text-muted">@m.StudentEmail</div>
+                        </td>
+                        <td class="small">
+                            <div>@m.SupervisorName</div>
+                            <div class="text-muted">@m.SupervisorEmail</div>
+                        </td>
+                        <td class="small text-muted">@m.ResearchAreaName</td>
+                        <td><span class="badge @mbClass px-2 py-1 rounded-pill small">@mbLabel</span></td>
+                        <td><span class="badge @pbClass px-2 py-1 rounded-pill small">@pbLabel</span></td>
+                        <td class="small text-muted">@m.MatchCreatedAt.ToString("dd MMM")</td>
+                        <td>
+                            <a asp-controller="Admin" asp-action="Reassign" asp-route-matchId="@m.MatchId"
+                               class="btn btn-xs btn-outline-warning small" id="reassignBtn_@m.MatchId">Reassign</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

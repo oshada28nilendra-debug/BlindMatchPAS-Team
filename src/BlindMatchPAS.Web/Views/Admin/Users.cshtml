@@ -1,0 +1,65 @@
+@model IEnumerable<BlindMatchPAS.Web.ViewModels.Admin.UserListViewModel>
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-people-fill me-2 text-gradient"></i>User Management</h1>
+    <p class="text-muted small mb-0">Manage all registered accounts</p>
+</div>
+
+<div class="pas-card">
+    <div class="table-responsive">
+        <table class="pas-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.OrderByDescending(u => u.CreatedAt))
+                {
+                    <tr id="userRow_@user.Id">
+                        <td class="fw-500">@user.FullName</td>
+                        <td class="small text-muted">@user.Email</td>
+                        <td>
+                            <span class="badge @(user.Role == "Student" ? "badge-pending" : user.Role == "Supervisor" ? "badge-interested" : "badge-revealed") px-2 py-1 rounded-pill small">
+                                @user.Role
+                            </span>
+                        </td>
+                        <td class="small text-muted">@(user.Department ?? "—")</td>
+                        <td class="small text-muted">@user.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="badge badge-matched px-2 py-1 rounded-pill small">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-withdrawn px-2 py-1 rounded-pill small">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="ToggleUserActive" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <input type="hidden" name="isActive" value="@(!user.IsActive)" />
+                                <button type="submit" class="btn btn-xs btn-outline-@(user.IsActive ? "warning" : "success") small"
+                                        id="toggleUser_@user.Id">
+                                    @(user.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

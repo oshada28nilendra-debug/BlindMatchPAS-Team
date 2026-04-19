@@ -1,0 +1,91 @@
+@model IEnumerable<BlindMatchPAS.Web.Models.ResearchArea>
+@{
+    ViewData["Title"] = "Research Areas";
+    Layout = "_Layout";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1><i class="bi bi-tags-fill me-2 text-gradient"></i>Research Areas</h1>
+        <p class="text-muted small mb-0">Manage research area tags for project proposals</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAreaModal" id="createAreaBtn">
+        <i class="bi bi-plus-circle me-2"></i>Add Area
+    </button>
+</div>
+
+<div class="pas-card">
+    <div class="table-responsive">
+        <table class="pas-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var area in Model)
+                {
+                    <tr id="areaRow_@area.Id">
+                        <td class="fw-500">@area.Name</td>
+                        <td class="small text-muted">@(area.Description ?? "—")</td>
+                        <td class="small text-muted">@area.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (area.IsActive)
+                            {
+                                <span class="badge badge-matched px-2 py-1 rounded-pill small">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-withdrawn px-2 py-1 rounded-pill small">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="ToggleResearchArea" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@area.Id" />
+                                <input type="hidden" name="isActive" value="@(!area.IsActive)" />
+                                <button type="submit" class="btn btn-xs btn-outline-@(area.IsActive ? "warning" : "success") small"
+                                        id="toggleArea_@area.Id">
+                                    @(area.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createAreaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background:var(--pas-surface);border:1px solid var(--pas-border)">
+            <div class="modal-header border-bottom" style="border-color:var(--pas-border)!important">
+                <h5 class="modal-title">Add Research Area</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="Admin" asp-action="CreateResearchArea" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Quantum Computing" required id="newAreaName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Brief description…" id="newAreaDesc"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top" style="border-color:var(--pas-border)!important">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveNewAreaBtn">Create Area</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
