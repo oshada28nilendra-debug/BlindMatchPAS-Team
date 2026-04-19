@@ -1,0 +1,185 @@
+@model BlindMatchPAS.Web.ViewModels.Supervisor.SupervisorDashboardViewModel
+@using BlindMatchPAS.Web.Models.Enums
+@{
+    ViewData["Title"] = "Supervisor Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+        <h1><i class="bi bi-person-workspace me-2 text-gradient"></i>Supervisor Dashboard</h1>
+        <p class="text-muted small mb-0">Browse anonymous proposals and manage your matches</p>
+    </div>
+    <a asp-controller="Supervisor" asp-action="ManageExpertise" class="btn btn-outline-primary" id="manageExpertiseBtn">
+        <i class="bi bi-tags me-2"></i>Manage Expertise
+    </a>
+</div>
+
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-heart"></i></div>
+            <div>
+                <div class="stat-value">@Model.InterestedCount</div>
+                <div class="stat-label">Interested</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-handshake"></i></div>
+            <div>
+                <div class="stat-value">@Model.ConfirmedCount</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-eye"></i></div>
+            <div>
+                <div class="stat-value">@Model.RevealedCount</div>
+                <div class="stat-label">Revealed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter by area -->
+<div class="pas-card mb-4">
+    <form method="get" asp-controller="Supervisor" asp-action="Dashboard" class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="small fw-500 text-muted me-2"><i class="bi bi-funnel me-1"></i>Filter by area:</span>
+        @foreach (var area in Model.AllResearchAreas)
+        {
+            <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="areas" value="@area.Id" id="area_@area.Id"
+                       @(Model.SelectedAreaIds.Contains(area.Id) ? "checked" : "") />
+                <label class="form-check-label small" for="area_@area.Id">@area.Name</label>
+            </div>
+        }
+        <button type="submit" class="btn btn-sm btn-primary ms-2" id="filterBtn">Apply</button>
+    </form>
+</div>
+
+<div class="row g-4">
+    <!-- Browse Projects -->
+    <div class="col-lg-7">
+        <h5 class="fw-600 mb-3">
+            <i class="bi bi-search me-2 text-primary"></i>
+            Anonymous Proposals <span class="badge bg-secondary ms-1">@Model.BrowseableProjects.Count</span>
+        </h5>
+
+        @if (!Model.BrowseableProjects.Any())
+        {
+            <div class="pas-card text-center py-4">
+                <i class="bi bi-inbox display-5 text-muted mb-2 d-block"></i>
+                <p class="text-muted small mb-0">No new proposals matching your expertise areas.</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var project in Model.BrowseableProjects)
+                {
+                    <div class="anon-card" id="projectCard_@project.ProjectId">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="anon-avatar"><i class="bi bi-file-text"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="small text-muted"><i class="bi bi-tag me-1"></i>@project.ResearchAreaName</span>
+                                    <span class="small text-muted">·</span>
+                                    <span class="small text-muted">@project.SubmittedAt.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <h6 class="mb-1 fw-600">@project.Title</h6>
+                                <p class="small text-muted mb-2">
+                                    @(project.Abstract.Length > 200 ? project.Abstract[..200] + "…" : project.Abstract)
+                                </p>
+                                <div class="small mb-3">
+                                    <i class="bi bi-code-slash me-1 text-primary"></i>
+                                    <span class="text-muted">@project.TechStack</span>
+                                </div>
+
+                                <form asp-controller="Supervisor" asp-action="ExpressInterest" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="ProjectId" value="@project.ProjectId" />
+                                    <div class="mb-2">
+                                        <textarea name="Notes" class="form-control form-control-sm"
+                                                  rows="2" placeholder="Optional notes for this proposal..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary" id="expressInterest_@project.ProjectId">
+                                        <i class="bi bi-heart me-1"></i>Express Interest
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- My Matches -->
+    <div class="col-lg-5">
+        <h5 class="fw-600 mb-3">
+            <i class="bi bi-link-45deg me-2 text-success"></i>
+            My Matches <span class="badge bg-secondary ms-1">@Model.MyMatches.Count</span>
+        </h5>
+
+        @if (!Model.MyMatches.Any())
+        {
+            <div class="pas-card text-center py-4">
+                <i class="bi bi-heart display-5 text-muted mb-2 d-block"></i>
+                <p class="text-muted small mb-0">No matches yet. Express interest in a proposal.</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var match in Model.MyMatches)
+                {
+                    <div class="pas-card" id="matchCard_@match.MatchId">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            @{
+                                var (mbadge, mlabel) = match.Status switch {
+                                    MatchStatus.Interested => ("badge-interested", "Interested"),
+                                    MatchStatus.Confirmed  => ("badge-confirmed",  "Confirmed"),
+                                    MatchStatus.Revealed   => ("badge-revealed",   "Revealed"),
+                                    _                      => ("badge-pending",    "Unknown")
+                                };
+                            }
+                            <span class="badge @mbadge px-2 py-1 rounded-pill small">@mlabel</span>
+                            <span class="small text-muted ms-auto">@match.CreatedAt.ToString("dd MMM")</span>
+                        </div>
+                        <h6 class="mb-1 fw-600">@match.ProjectTitle</h6>
+                        <div class="small text-muted mb-2"><i class="bi bi-tag me-1"></i>@match.ResearchAreaName</div>
+
+                        @if (match.IsRevealed)
+                        {
+                            <div class="p-2 rounded mb-2" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2)">
+                                <div class="reveal-badge mb-1"><i class="bi bi-eye-fill"></i> Identity Revealed</div>
+                                <div class="small fw-600">@match.StudentName</div>
+                                <div class="small text-muted">@match.StudentEmail</div>
+                            </div>
+                        }
+                        else if (match.Status == MatchStatus.Interested)
+                        {
+                            <form asp-controller="Supervisor" asp-action="ConfirmMatch" method="post" class="mb-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="matchId" value="@match.MatchId" />
+                                <button type="submit" class="btn btn-sm btn-success w-100" id="confirmMatch_@match.MatchId"
+                                        onclick="return confirm('Confirm this match? Student identity will be revealed.')">
+                                    <i class="bi bi-check2-circle me-1"></i>Confirm Match &amp; Reveal
+                                </button>
+                            </form>
+                        }
+                        <a asp-controller="Supervisor" asp-action="MatchDetails" asp-route-id="@match.MatchId"
+                           class="btn btn-sm btn-outline-secondary w-100 mt-1" id="viewMatch_@match.MatchId">
+                            <i class="bi bi-arrow-right me-1"></i>View Details
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
