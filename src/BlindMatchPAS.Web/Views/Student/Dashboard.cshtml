@@ -1,0 +1,130 @@
+@model BlindMatchPAS.Web.ViewModels.Student.StudentDashboardViewModel
+@using BlindMatchPAS.Web.Models.Enums
+@{
+    ViewData["Title"] = "Student Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h1><i class="bi bi-mortarboard-fill me-2 text-gradient"></i>Student Dashboard</h1>
+        <p class="text-muted small mb-0">Track your project proposals and match status</p>
+    </div>
+    <a asp-controller="Student" asp-action="Submit" class="btn btn-primary" id="submitProjectBtn">
+        <i class="bi bi-plus-circle me-2"></i>Submit Project
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon amber"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <div class="stat-value">@Model.PendingCount</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-eye"></i></div>
+            <div>
+                <div class="stat-value">@Model.UnderReviewCount</div>
+                <div class="stat-label">Under Review</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <div class="stat-value">@Model.MatchedCount</div>
+                <div class="stat-label">Matched</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Projects -->
+@if (!Model.Projects.Any())
+{
+    <div class="pas-card text-center py-5">
+        <i class="bi bi-file-earmark-plus display-4 text-muted mb-3 d-block"></i>
+        <h5 class="text-muted">No projects yet</h5>
+        <p class="text-muted small">Submit your first project proposal to get started</p>
+        <a asp-controller="Student" asp-action="Submit" class="btn btn-primary mt-2">Submit Project</a>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var project in Model.Projects)
+        {
+            <div class="col-12">
+                <div class="pas-card">
+                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                @{
+                                    var (badgeCls, dotCls, statusLabel) = project.Status switch {
+                                        ProjectStatus.Pending    => ("badge-pending",   "dot-pending", "Pending"),
+                                        ProjectStatus.UnderReview=> ("badge-review",    "dot-review",  "Under Review"),
+                                        ProjectStatus.Matched    => ("badge-matched",   "dot-matched", "Matched"),
+                                        _                        => ("badge-withdrawn", "",            "Withdrawn")
+                                    };
+                                }
+                                <span class="badge @badgeCls px-3 py-1 rounded-pill small">
+                                    @if (!string.IsNullOrEmpty(dotCls)) { <span class="status-dot @dotCls"></span> }
+                                    @statusLabel
+                                </span>
+                                <span class="small text-muted">
+                                    <i class="bi bi-tag me-1"></i>@project.ResearchAreaName
+                                </span>
+                            </div>
+                            <h5 class="mb-1 fw-600">@project.Title</h5>
+                            <div class="small text-muted">
+                                Submitted @project.CreatedAt.ToString("dd MMM yyyy")
+                            </div>
+
+                            @if (project.IsRevealed && project.SupervisorName != null)
+                            {
+                                <div class="mt-3 p-3 rounded" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25)">
+                                    <div class="reveal-badge mb-2"><i class="bi bi-eye-fill"></i> Supervisor Revealed</div>
+                                    <div class="small fw-600">@project.SupervisorName</div>
+                                    <div class="small text-muted">@project.SupervisorEmail</div>
+                                    @if (project.SupervisorDepartment != null)
+                                    {
+                                        <div class="small text-muted"><i class="bi bi-building me-1"></i>@project.SupervisorDepartment</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex gap-2 flex-shrink-0 align-items-start">
+                            <a asp-controller="Student" asp-action="ProjectDetails" asp-route-id="@project.Id"
+                               class="btn btn-sm btn-outline-secondary" id="viewProject_@project.Id">
+                                <i class="bi bi-eye me-1"></i>Details
+                            </a>
+                            @if (project.Status == ProjectStatus.Pending)
+                            {
+                                <a asp-controller="Student" asp-action="Edit" asp-route-id="@project.Id"
+                                   class="btn btn-sm btn-outline-primary" id="editProject_@project.Id">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-controller="Student" asp-action="Withdraw" method="post" class="d-inline"
+                                      onsubmit="return confirm('Withdraw this project?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@project.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" id="withdrawProject_@project.Id">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
