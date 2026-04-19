@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Create Research Area";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1><i class="bi bi-plus-circle-fill me-2 text-gradient"></i>Create Research Area</h1>
+    <p class="text-muted small mb-0">Add a new research area tag</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="pas-card">
+            <form asp-controller="Admin" asp-action="CreateResearchArea" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors mb-3"></div>
+
+                <div class="mb-4">
+                    <label for="name" class="form-label">Research Area Name</label>
+                    <input type="text" name="name" id="newAreaName" class="form-control"
+                           placeholder="e.g. Quantum Computing" required maxlength="150" />
+                    <div class="small text-muted mt-1">2–150 characters</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="description" class="form-label">Description <span class="text-muted">(optional)</span></label>
+                    <textarea name="description" id="newAreaDesc" class="form-control" rows="3"
+                              placeholder="Brief overview of this research area..." maxlength="500"></textarea>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary px-4" id="createAreaSubmitBtn">
+                        <i class="bi bi-plus-circle me-2"></i>Create Area
+                    </button>
+                    <a asp-controller="Admin" asp-action="ResearchAreas" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
